@@ -72,8 +72,17 @@ npm run dev                 # http://localhost:5173
 
 ## Configurações opcionais
 
-- **Login com Google:** crie um OAuth Client ID (aplicativo Web, origem `http://localhost:5173`) e preencha `GOOGLE_CLIENT_ID` (backend) e `VITE_GOOGLE_CLIENT_ID` (frontend). Sem isso, o botão aparece mas avisa que não está configurado.
-- **Recuperação de senha:** preencha `SMTP_*` e `APP_URL` no backend. Sem SMTP, o link de redefinição é impresso no console do servidor (útil em desenvolvimento).
+- **Login com Google:** a autenticação com Google já está configurada e disponível na versão publicada do SkinConnect, permitindo que os usúarios acessem o sistema utilizando sua conta Google, sem necessidade de configurações adicionais. Para execução local, é necessário configurar variáveis GOOGLE_CLIENT_ID E VITE_GOOGLE_CLIENT_ID.
+- **Recuperação de senha:** o envio de e-mails para redefinição de senha está integrado à API do Brevo e configurado na versão publicada do SkinConnect. Os usuários podem solicitar a recuperação de senha diretamente pela tela de login, sem necessidade de configurações adicionais. Para execução local, é necessário configurar as variáveis BREVO_API_KEY, BREVO_SENDER_EMAIL e APP_URL no backend.
+
+## Instalação no celular
+
+O SkinConnect pode ser adicionado à tela inicial de dispositivos Android e iOS, com ícone personalizado e aparência de aplicativo.
+
+- **Android:** acesse o site pelo Chrome, toque nos três pontos e selecione a opção de adicionar à tela inicial ou instalar o aplicativo.
+- **iOS:** acesse o site pelo Safari, toque em compartilhar e selecione Adicionar à Tela de Início.
+
+Não é necessário realizar o download pela Play Store ou App Store.
 
 ## Regras de negócio
 
