@@ -1,19 +1,37 @@
 import 'dotenv/config';
-import nodemailer from 'nodemailer';
-
-const transporte = process.env.SMTP_HOST
-  ? nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: Number(process.env.SMTP_PORT) === 465,
-      auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
-    })
-  : null;
 
 export async function enviarEmail({ para, assunto, texto }) {
-  if (!transporte) {
-    console.log(`\n[e-mail simulado — defina SMTP_HOST para enviar de verdade]\nPara: ${para}\nAssunto: ${assunto}\n${texto}\n`);
-    return;
+  const apiKey = process.env.BREVO_API_KEY;
+  const remetente = process.env.BREVO_SENDER_EMAIL;
+
+  if (!apiKey || !remetente) {
+    throw new Error('Brevo não configurado.');
   }
-  await transporte.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: para, subject: assunto, text: texto });
+
+  const resposta = await fetch(
+    'https://api.brevo.com/v3/smtp/email',
+    {
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: 'SkinConnect',
+          email: remetente
+        },
+        to: [{ email: para }],
+        subject: assunto,
+        textContent: texto
+      })
+    }
+  );
+
+  if (!resposta.ok) {
+    throw new Error(`Erro ao enviar e-mail: ${resposta.status}`);
+  }
+
+  return await resposta.json();
 }
