@@ -1,21 +1,51 @@
 # SkinConnect
 
-Plataforma em que a **clínica** cria planos de cuidados com a pele e o **paciente** cumpre as rotinas diárias, envia fotos e acompanha a evolução.
+## Sobre o projeto
 
-- **Backend:** Node.js 18+, Express 5, MySQL 8+, JWT, bcrypt, multer, pdfkit, exceljs
-- **Frontend:** React 18 (hooks), React Router 6, Chart.js, TailwindCSS, lucide-react (Vite)
+O SkinConnect é uma plataforma web desenvolvida para facilitar o acompanhamento de tratamentos e rotinas de cuidados com a pele, conectando clínicas e pacientes.
+
+## Objetivo
+
+Auxiliar as clínicas na elaboração de planos personalizados de cuidados com a pele e permitir que os pacientes acompanhem suas rotinas diárias, registrem suas atividades e visualizem sua evolução.
+
+## Contexto acadêmico 
+
+Projeto desenvolvido para a disciplina de Projeto de Desenvolvimento de Sistemas Web, curso de Análise e Desenvolvimento de Sistemas (ADS). 
+
+## Tecnologias utilizadas
+
+### Frontend
+- HTML5
+- CSS3
+- JavaScript
+- React 18
+- Vite
+- Tailwind CSS
+- React Router 6
+- Chart.js
+- Lucide React
+
+### Backend
+- Node.js
+- Express
+- MySQL
+- JWT
+- bcrypt
+- Multer
+- PDFKit
+- ExcelJS
 
 ## Como rodar
 
 ```bash
-# 1) Banco (se já criou a versão anterior: DROP DATABASE skinconnect; antes)
+# 1) Configuração do banco de dados skinconnect_v2
 mysql -u root -p < database/schema.sql
 
 # 2) API
 cd backend
 cp .env.example .env        # ajuste DB_* e JWT_SECRET
 npm install
-npm run dev                 # http://localhost:4000
+npm run dev                 # http://localhost:4001
 
 # 3) Frontend
 cd ../frontend
@@ -28,16 +58,16 @@ npm run dev                 # http://localhost:5173
 
 | Perfil | Telas |
 |---|---|
-| Público | Entrar (escolha Clínica/Paciente), Criar conta, Esqueci minha senha, Redefinir senha |
+| Público | Entrar (escolha Clínica/Paciente), Login com Google, Criar conta, Esqueci minha senha, Redefinir senha |
 | Clínica | **Painel** (indicadores, adesão por paciente, evolução 14 dias, "Precisam de atenção", recentes) · **Pacientes** (busca, novo paciente, código de convite) · **Ficha do paciente** (evolução, fotos, planos, novo plano) · **Relatórios** (filtros, PDF e Excel) |
-| Paciente | **Meu dia** (checklist por período, botão Concluir, sino com alertas) · **Meu plano** · **Evolução** (gráfico, sequência de dias, upload de foto com preview, histórico) |
+| Paciente | **Meu dia** (checklist por período, marcar e desmarcar rotinas concluídas, sino com alertas) · **Meu plano** · **Evolução** (gráfico, sequência de dias, upload de foto com preview, histórico) |
 
 ## Fluxo para testar
 
 1. Em **Criar conta**, cadastre a clínica.
 2. Em **Pacientes → Novo paciente**, cadastre a ficha (nome e e-mail). A conta do paciente **se vincula automaticamente** quando ele criar a conta com o mesmo e-mail, ou pelo link de convite (`Copiar link de convite`).
 3. Abra a ficha e clique em **Novo plano**: título, objetivo, datas e rotinas (horário, nome, produto, instruções). Novo plano encerra o anterior.
-4. Entre como paciente: em **Meu dia**, conclua as rotinas. No horário de cada uma, o sino e um aviso aparecem.
+4. Entre como paciente: em **Meu dia**, marque ou desmarque as rotinas concluídas. No horário de cada rotina, o sino e um aviso aparecem.
 5. Em **Evolução**, envie fotos. A clínica vê tudo na ficha e em **Relatórios**.
 
 ## Configurações opcionais
@@ -51,12 +81,12 @@ npm run dev                 # http://localhost:5173
 - **Período** (manhã/tarde/noite) vem do horário: antes de 12h, 12h–17h59, a partir de 18h.
 - **Precisam de atenção:** pacientes com plano ativo e adesão abaixo de 50% nos últimos 7 dias.
 - **Dias seguidos 100%:** sequência de dias com todas as rotinas feitas (o dia de hoje só conta quando completo).
-- Cada rotina só pode ser concluída uma vez por dia (índice único em `Execucoes`).
+- Cada rotina pode ser marcada ou desmarcada como concluída pelo paciente, mantendo apenas um registro de conclusão por dia.
 - Fuso das datas do servidor: `DB_TIMEZONE` (padrão `-03:00`).
 
 ## Segurança
 
-- Senhas com bcrypt; JWT de 8 h; cada rota exige o perfil correto e filtra pelo `id` do token. A clínica só acessa seus pacientes; o paciente só conclui rotinas dos próprios planos.
+- Senhas com bcrypt; JWT de 8 h; cada rota exige o perfil correto e filtra pelo `id` do token. A clínica só acessa seus pacientes; o paciente só pode marcar e desmarcar rotinas dos próprios planos.
 - Recuperação de senha: token aleatório guardado só como hash SHA-256, validade de 1 h, uso único; a resposta é a mesma exista ou não a conta.
 - Upload: JPG/PNG/WebP, 5 MB, nome aleatório (UUID). As fotos são servidas em `/uploads` por URL não adivinhável, sem login; para sigilo total, sirva-as por rota autenticada ou storage com URL assinada.
 - **Atenção à vinculação por e-mail:** quem criar conta com o e-mail de uma ficha ainda não vinculada assume a ficha. Em produção, exija verificação de e-mail (ou use o login com Google, que já vem verificado) antes de liberar os dados.
@@ -64,7 +94,7 @@ npm run dev                 # http://localhost:5173
 
 ## API
 
-Base: `http://localhost:4000/api` · Autenticação: `Authorization: Bearer <token>` · Erros: `{ "erro": "mensagem" }`
+Base: `http://localhost:4001/api` · Autenticação: `Authorization: Bearer <token>` · Erros: `{ "erro": "mensagem" }`
 
 ### Público
 
@@ -98,7 +128,7 @@ Login e cadastro respondem `{ token, usuario }`. `tipo_pele`: `normal, seca, ole
 | Método | Rota | Descrição |
 |---|---|---|
 | GET | `/paciente/hoje` | `{ nome, clinica, plano, rotinas[] }` com `concluida` e `periodo` |
-| POST | `/paciente/rotinas/:id/concluir` | Marca a rotina como feita hoje |
+| POST | `/paciente/rotinas/:id/concluir` | Marca ou desmarca a rotina como concluída no dia atual |
 | GET | `/paciente/plano` | `{ clinica, plano }` com rotinas |
 | GET | `/paciente/evolucao` | `{ adesao_30, concluidas, dias_seguidos, dias[], fotos[] }` |
 | POST | `/paciente/fotos` | `multipart/form-data`: `foto`, `descricao?`, `tipo?` (`antes, evolucao, depois`) |

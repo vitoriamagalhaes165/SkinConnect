@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS skinconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE skinconnect;
+CREATE DATABASE IF NOT EXISTS skinconnect_v2 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE skinconnect_v2;
 
 CREATE TABLE IF NOT EXISTS Clinicas (
   id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
