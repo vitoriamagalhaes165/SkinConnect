@@ -103,7 +103,10 @@ Não é necessário realizar o download pela Play Store ou App Store.
 
 ## API
 
-Base: `http://localhost:4001/api` · Autenticação: `Authorization: Bearer <token>` · Erros: `{ "erro": "mensagem" }`
+- **Base local:** `http://localhost:4001/api`
+- **Base em produção:** `https://skinconnect-production.up.railway.app/api`
+- **Autenticação (rotas protegidas):** `Authorization: Bearer <token>`
+- **Erros:** `{ "erro": "mensagem" }`
 
 ### Público
 
