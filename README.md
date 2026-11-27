@@ -97,7 +97,7 @@ Não é necessário realizar o download pela Play Store ou App Store.
 
 - Senhas com bcrypt; JWT de 8 h; cada rota exige o perfil correto e filtra pelo `id` do token. A clínica só acessa seus pacientes; o paciente só pode marcar e desmarcar rotinas dos próprios planos.
 - Recuperação de senha: token aleatório guardado só como hash SHA-256, validade de 1 h, uso único; a resposta é a mesma exista ou não a conta.
-- Upload: JPG/PNG/WebP, 5 MB, nome aleatório (UUID). As fotos são servidas em `/uploads` por URL não adivinhável, sem login; para sigilo total, sirva-as por rota autenticada ou storage com URL assinada.
+- **Upload e proteção de fotos:** JPG/PNG/WebP, até 5 MB, com nome aleatório (UUID). As fotos são servidas pela rota autenticada `/uploads`, exigindo token JWT válido. O paciente só pode acessar suas próprias fotos, e a clínica só pode acessar fotos de seus pacientes. O acesso direto sem autenticação é bloqueado.
 - **Atenção à vinculação por e-mail:** quem criar conta com o e-mail de uma ficha ainda não vinculada assume a ficha. Em produção, exija verificação de e-mail (ou use o login com Google, que já vem verificado) antes de liberar os dados.
 - Em produção: HTTPS, `JWT_SECRET` longo, `CORS_ORIGIN` restrito e limite de tentativas de login (ex.: `express-rate-limit`).
 
