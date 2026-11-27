@@ -8,14 +8,68 @@ import authRoutes from './routes/auth.js';
 import clinicaRoutes from './routes/clinica.js';
 import pacienteRoutes from './routes/paciente.js';
 import relatorioRoutes from './routes/relatorios.js';
+import jwt from 'jsonwebtoken';
+import { pool } from './db.js';
 
 const app = express();
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } })); // permite <img> vindo do frontend
 app.use(cors({ origin: (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',') }));
 app.use(express.json({ limit: '100kb' }));
 
-// Fotos: nomes aleatórios (UUID) e sem listagem de diretório
-app.use('/uploads', express.static(UPLOAD_DIR, { index: false, dotfiles: 'deny', maxAge: '7d' }));
+// Fotos protegidas por autenticação e permissão
+app.get('/uploads/:arquivo', async (req, res, next) => {
+  res.set('Cache-Control', 'private, no-store');
+
+  const cab = req.headers.authorization || '';
+  const token = cab.startsWith('Bearer ') ? cab.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ erro: 'Faça login para continuar.' });
+  }
+
+  let usuario;
+
+  try {
+    usuario = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return res.status(401).json({ erro: 'Sessão inválida ou expirada.' });
+  }
+
+  const arquivo = req.params.arquivo;
+
+  if (!/^[a-f0-9-]{36}\.(jpg|png|webp)$/i.test(arquivo)) {
+    return res.status(404).json({ erro: 'Foto não encontrada.' });
+  }
+
+  try {
+    const [fotos] = await pool.query(
+      `SELECT f.caminho
+       FROM Fotos f
+       JOIN Pacientes p ON p.id = f.paciente_id
+       WHERE f.caminho = ?
+       AND (
+         (? = 'paciente' AND p.id = ?)
+         OR
+         (? = 'clinica' AND p.clinica_id = ?)
+       )
+       LIMIT 1`,
+      [arquivo, usuario.perfil, usuario.id,
+       usuario.perfil, usuario.id]
+    );
+
+    if (!fotos.length) {
+      return res.status(404).json({ erro: 'Foto não encontrada.' });
+    }
+
+    res.sendFile(arquivo, {
+      root: UPLOAD_DIR,
+      dotfiles: 'deny',
+      cacheControl: false
+    });
+  } catch (erro) {
+    next(erro);
+  }
+});
 
 app.get('/api/saude', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
