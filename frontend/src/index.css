@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-fundo font-sans text-tinta antialiased; }
+  h1, h2, h3 { @apply font-display font-medium; }
+}
+
+@layer components {
+  .card { @apply rounded-[28px] border border-linha bg-white shadow-card; }
+  .eyebrow { @apply text-[13px] font-medium uppercase tracking-[0.12em] text-suave; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-verde disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primario { @apply btn bg-verde text-white hover:bg-verde-escuro; }
+  .btn-contorno { @apply btn border border-linha bg-white hover:bg-verde-claro; }
+  .campo { @apply w-full rounded-2xl border border-linha bg-white px-4 py-3 text-[15px] placeholder:text-suave/70 focus:border-verde focus:outline-none focus:ring-2 focus:ring-verde/25; }
+  .rotulo { @apply mb-1.5 block text-[15px] font-medium; }
+  .chip { @apply inline-flex items-center rounded-full border border-linha px-3 py-1 text-[13px] text-suave; }
+  .erro { @apply rounded-2xl bg-alerta-claro px-4 py-3 text-sm text-alerta; }
+  .sucesso { @apply rounded-2xl bg-verde-claro px-4 py-3 text-sm text-verde-escuro; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
